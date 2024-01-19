@@ -1,0 +1,6 @@
+#!/bin/bash
+
+
+python /proj/code/manage.py makemessages -l ru
+python /proj/code/manage.py makemessages -l en
+python /proj/code/manage.py makemessages -l kk

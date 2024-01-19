@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  ecommerce:
+    container_name: ecommerce
+    hostname: ecommerce
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - code/.env
+    environment:
+      DB_URL: postgres://postgres:qwerty123@ecommerce-db:5432/postgres
+      REDIS_URL: redis://ecommerce-redis:6379
+    depends_on:
+      - ecommerce-db
+      - ecommerce-redis
+    volumes:
+      - .:/proj
+      - /proj/bin
+    command: python /proj/code/manage.py runserver 0.0.0.0:8000
+    expose:
+      - 8000
+    ports:
+      - "9000:8000"
+
+  ecommerce-celery:
+    container_name: ecommerce-celery
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - code/.env
+    depends_on:
+      - ecommerce
+    volumes:
+      - .:/proj
+      - /proj/bin
+    command: celery worker -A celery -l info --workdir /proj/code
+
+  ecommerce-db:
+    container_name: ecommerce-db
+    hostname: ecommerce-db
+    image: postgres:14
+    environment:
+      POSTGRES_PASSWORD: qwerty123
+    volumes:
+      - ecommerce_db_data:/var/lib/postgresql/data
+    ports:
+      - "6543:5432"
+
+  ecommerce-redis:
+    container_name: ecommerce-redis
+    image: redis
+
+
+volumes:
+  ecommerce_db_data: { }
