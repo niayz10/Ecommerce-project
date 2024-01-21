@@ -38,7 +38,8 @@ services:
     volumes:
       - .:/proj
       - /proj/bin
-    command: celery worker -A celery -l info --workdir /proj/code
+    command: celery -A celery worker -l info
+    working_dir: /proj/code
 
   ecommerce-db:
     container_name: ecommerce-db

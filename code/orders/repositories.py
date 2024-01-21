@@ -23,7 +23,7 @@ class OrderRepositoriesInterface(Protocol):
 class OrderRepositoriesV1:
 
     @staticmethod
-    def create_order(data: OrderedDict) -> tuple(models.Order, payments_models.Bill):
+    def create_order(data: OrderedDict) -> tuple[models.Order, payments_models.Bill]:
         with transaction.atomic():
             order_items = data.pop('order_items')
 

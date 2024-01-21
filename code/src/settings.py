@@ -14,7 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 import dj_database_url
 
-from src import middleware
+from src import middlewares
 
 
 env = environ.Env()
@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'django_cleanup.apps.CleanupConfig',
     'phonenumbers',
     "phonenumber_field",
+    'drf_yasg',
 
     'users',
     'products',
@@ -77,8 +78,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'src.middleware.middleware.HttpApiMiddleware',
-    'src.middleware.middleware.SecondMiddleware',
+    'src.middlewares.middleware.HttpApiMiddleware',
+    'src.middlewares.middleware.SecondMiddleware',
 
 ]
 
@@ -110,7 +111,8 @@ ASGI_APPLICATION = 'src.asgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://postgres:qwerty123@localhost:6543/postgres'
+        env='DB_URL',
+        default='postgres://postgres:qwerty123@ecommerce-db:5432/postgres',
     ),
 }
 
@@ -174,21 +176,22 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=300),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://localhost:6379/1',
+        'LOCATION': 'redis://ecommerce-redis:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -201,7 +204,7 @@ SWAGGER_SETTINGS = {
       'Bearer': {
             'type': 'apiKey',
             'name': 'Authorization',
-            'in': 'header'
+            'in': 'header',
       }
    }
 }
@@ -210,20 +213,17 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('localhost', 6379)],
+            'hosts': [('ecommerce-redis', 6379)],
         },
     },
 }
 
-# CORS_ALLOW_ALL_ORIGINS = True
-
 CORS_ALLOWED_ORIGINS = (
-    "https://localhost:3000",
-    "https://sub.example.com",
+    'http://localhost:3000',
+    'https://example.com',
 )
 
-
 CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_ACCEPT_CONTENT = ['application.json']
+CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
